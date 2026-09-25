@@ -88,15 +88,33 @@ export default function Home() {
   }
 
   function printResult(index: number) {
-    const cards = Array.from(document.querySelectorAll<HTMLElement>("article[data-result-index]"));
+    const cards = Array.from(
+      document.querySelectorAll<HTMLElement>("article[data-result-index]")
+    );
     const target = cards.find((card) => card.dataset.resultIndex === String(index));
 
+    if (!target) return;
+
+    // Keep the selected card marked for the whole print lifecycle.
+    // On iPhone/iPad Safari window.print() is non-blocking, so removing
+    // the class immediately after the call can make the print preview blank.
     cards.forEach((card) => card.classList.remove("printTarget"));
-    target?.classList.add("printTarget");
+    target.classList.add("printTarget");
 
+    // Dismiss the iOS keyboard (when visible) and force Safari to apply
+    // the print-target styles before opening the native print sheet.
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    void target.offsetHeight;
+
+    const cleanup = () => {
+      target.classList.remove("printTarget");
+      window.removeEventListener("afterprint", cleanup);
+    };
+
+    window.addEventListener("afterprint", cleanup, { once: true });
     window.print();
-
-    target?.classList.remove("printTarget");
   }
 
   return (

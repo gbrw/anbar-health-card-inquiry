@@ -224,6 +224,8 @@ button:disabled { opacity: .6; cursor: default; }
   html, body {
     background: #fff !important;
     color: #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .wrap { width: 100%; margin: 0; padding: 0; }
@@ -232,7 +234,7 @@ button:disabled { opacity: .6; cursor: default; }
 
   .results { display: block; margin: 0; }
   .results .card { display: none; }
-  .results .card.printTarget { display: block; }
+  .results .card.printTarget { display: block !important; }
 
   .card {
     box-shadow: none;
