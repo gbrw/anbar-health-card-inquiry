@@ -621,242 +621,56 @@ button:disabled {
 @media print {
   @page {
     size: A4;
-    margin: 12mm;
+    margin: 8mm;
   }
 
   html,
   body {
+    margin: 0 !important;
+    padding: 0 !important;
     background: #fff !important;
     color: #000;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  .wrap {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-
-  .noPrint,
+  /* When the print preview exists, print only the already-generated image.
+     It is mounted before the user taps “طباعة الآن”, so Safari/iPhone does
+     not race React rendering and no blank page is produced. */
+  .wrap,
+  .previewOverlay,
+  .iosPrintSheet,
   .officialHeader,
   .hero,
   .notice,
-  .previewOverlay {
+  .results,
+  .searchBox,
+  .noPrint {
     display: none !important;
-  }
-
-  .onlyPrint {
-    display: flex;
-  }
-
-  .results {
-    display: block;
-    margin: 0;
-  }
-
-  .results .card {
-    display: none;
-  }
-
-  .results .card.printTarget {
-    display: block !important;
-  }
-
-  .card {
-    box-shadow: none;
-    border: 1px solid #bbb;
-    border-radius: 0;
-    padding: 10mm;
-    page-break-inside: avoid;
-  }
-
-  .printHeader {
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    text-align: center;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #000;
-  }
-
-  .printHeader strong {
-    font-size: 18px;
-  }
-
-  .printLogo {
-    display: block;
-  }
-
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .label {
-    font-size: 11pt;
-  }
-
-  .value {
-    font-size: 13pt;
-  }
-
-  .requirements {
-    background: #fff;
-    border-color: #bbb;
-    font-size: 10.5pt;
   }
 
   .previewPrintSheet {
-    display: none;
-  }
-
-  html.printImageMode .wrap,
-  html.printImageMode .previewOverlay {
-    display: none !important;
-  }
-
-  html.printImageMode .previewPrintSheet {
     display: flex !important;
-    width: 100%;
-    min-height: 100vh;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     align-items: flex-start;
     justify-content: center;
-    background: #fff;
-  }
-
-  html.printImageMode .previewPrintSheet img {
-    display: block;
-    width: 100%;
-    height: auto;
-    max-width: 100%;
-  }
-}
-
-/* Dedicated print document used by Safari/iPhone. It stays out of the normal UI. */
-.iosPrintSheet {
-  display: none;
-}
-
-@media print {
-  html.directPrintMode body {
     background: #fff !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
-  html.directPrintMode .wrap,
-  html.directPrintMode .previewOverlay,
-  html.directPrintMode .previewPrintSheet {
-    display: none !important;
-  }
-
-  html.directPrintMode .iosPrintSheet {
+  .previewPrintSheet img {
     display: block !important;
-    direction: rtl;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    color: #111827;
-    background: #fff;
-    font-family: Tahoma, Arial, sans-serif;
-  }
-
-  .iosPrintHeader {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 5px;
-    padding: 0 0 12px;
-    margin-bottom: 14px;
-    border-bottom: 2px solid #0b2f4f;
-  }
-
-  .iosPrintHeader img {
-    display: block;
-    width: 25mm;
-    height: 25mm;
-    object-fit: contain;
-  }
-
-  .iosPrintHeader strong {
-    font-size: 15pt;
-    line-height: 1.55;
-    color: #0b2f4f;
-  }
-
-  .iosPrintHeader span {
-    font-size: 13pt;
-    font-weight: 700;
-    color: #b51e23;
-  }
-
-  .iosPrintName {
-    margin-bottom: 10px;
-    padding: 9px 11px;
-    border: 1px solid #d8bd70;
-    background: #fff8e9;
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 273mm !important;
+    object-fit: contain !important;
+    margin: 0 auto !important;
+    break-inside: avoid;
     page-break-inside: avoid;
-  }
-
-  .iosPrintName span,
-  .iosPrintField span {
-    display: block;
-    margin-bottom: 2px;
-    color: #6d5314;
-    font-size: 10.5pt;
-    font-weight: 700;
-  }
-
-  .iosPrintName strong {
-    display: block;
-    font-size: 16pt;
-    line-height: 1.6;
-  }
-
-  .iosPrintGrid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 7px 10px;
-  }
-
-  .iosPrintField {
-    padding: 7px 9px;
-    border: 1px solid #ddd;
-    page-break-inside: avoid;
-  }
-
-  .iosPrintField strong {
-    display: block;
-    font-size: 12.5pt;
-    line-height: 1.55;
-    overflow-wrap: anywhere;
-  }
-
-  .iosPrintNotes {
-    margin-top: 12px;
-    padding: 9px 11px;
-    border: 1px solid #bdd9c5;
-    background: #f4fbf6;
-    page-break-inside: avoid;
-  }
-
-  .iosPrintNotes strong,
-  .iosPrintNotes span {
-    display: block;
-  }
-
-  .iosPrintNotes strong {
-    margin-bottom: 3px;
-    color: #176b3a;
-    font-size: 11.5pt;
-  }
-
-  .iosPrintNotes span {
-    font-size: 9.5pt;
-    line-height: 1.65;
-  }
-
-  html.printImageMode .iosPrintSheet {
-    display: none !important;
   }
 }

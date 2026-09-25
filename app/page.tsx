@@ -372,7 +372,6 @@ export default function Home() {
   const [workingIndex, setWorkingIndex] = useState<number | null>(null);
   const [shareStatus, setShareStatus] = useState("");
   const [preview, setPreview] = useState<PreviewState | null>(null);
-  const [printRow, setPrintRow] = useState<Result | null>(null);
 
   async function search(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -413,30 +412,6 @@ export default function Home() {
     }
   }
 
-  function directPrint(row: Result) {
-    setPrintRow(row);
-    document.documentElement.classList.remove("printImageMode");
-    document.documentElement.classList.add("directPrintMode");
-
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
-
-    const cleanup = () => {
-      document.documentElement.classList.remove("directPrintMode");
-      window.removeEventListener("afterprint", cleanup);
-    };
-    window.addEventListener("afterprint", cleanup, { once: true });
-
-    // Safari on iPhone needs the dedicated print DOM to be committed before
-    // opening the native print sheet. Two animation frames avoid the blank page.
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        window.print();
-      });
-    });
-  }
-
   function closePreview() {
     if (preview) URL.revokeObjectURL(preview.url);
     setPreview(null);
@@ -471,12 +446,10 @@ export default function Home() {
   }
 
   async function printResult(row: Result, index: number) {
-    if (isInAppBrowser()) {
-      await preparePreview(row, index, "print");
-      return;
-    }
-
-    directPrint(row);
+    // Always prepare the printable image first. The user then presses
+    // “طباعة الآن” from the preview, keeping the actual print/share call
+    // tied directly to a user gesture on iPhone and in-app browsers.
+    await preparePreview(row, index, "print");
   }
 
   async function nativeSharePreview() {
@@ -521,41 +494,49 @@ export default function Home() {
     }
   }
 
-  async function printPreviewImage() {
+  function printPreviewImage() {
     if (!preview) return;
 
-    // داخل متصفحات التطبيقات نحاول أولاً فتح لوحة النظام بالصورة نفسها؛
-    // على iPhone وAndroid تظهر منها خيارات الطباعة/المشاركة عندما يدعمها WebView.
-    if (isInAppBrowser() && typeof navigator.share === "function") {
-      try {
+    // In iOS in-app browsers (Messenger/Facebook/Instagram/WhatsApp/Telegram),
+    // window.print() is commonly blocked even after a tap. Open the native
+    // iOS share sheet with the already-created image instead; “Print” is
+    // available from the system actions when the host app permits it.
+    if (isInAppBrowser()) {
+      if (typeof navigator.share === "function") {
         const canShareFiles =
           typeof navigator.canShare === "function" &&
           navigator.canShare({ files: [preview.file] });
 
         if (canShareFiles) {
-          await navigator.share({
-            files: [preview.file],
-            title: "طباعة بيانات استلام بطاقة الضمان الصحي",
-            text: "اختر الطباعة من خيارات النظام، أو أرسل الصورة إلى المكتبة."
-          });
-          setShareStatus("تم فتح خيارات النظام. اختر الطباعة إن كانت متاحة، أو أرسل الصورة إلى المكتبة.");
+          void navigator
+            .share({
+              files: [preview.file],
+              title: "طباعة بيانات استلام بطاقة الضمان الصحي",
+              text: "اختر طباعة من خيارات iPhone، أو أرسل الصورة إلى المكتبة."
+            })
+            .then(() => {
+              setShareStatus("تم فتح خيارات iPhone. اختر طباعة، أو أرسل الصورة إلى المكتبة.");
+            })
+            .catch((err) => {
+              if (err instanceof DOMException && err.name === "AbortError") return;
+              setShareStatus("إذا لم تظهر الطباعة، افتح الصورة بالحجم الكامل ثم استخدم زر المشاركة في iPhone واختر طباعة.");
+            });
           return;
         }
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") return;
       }
+
+      // Fallback for restrictive WebViews: opening the prepared image is a
+      // direct user action and gives access to the iOS share/print controls.
+      const opened = window.open(preview.url, "_blank");
+      if (!opened) {
+        window.location.href = preview.url;
+      }
+      return;
     }
 
-    document.documentElement.classList.remove("directPrintMode");
-    document.documentElement.classList.add("printImageMode");
-    const cleanup = () => {
-      document.documentElement.classList.remove("printImageMode");
-      window.removeEventListener("afterprint", cleanup);
-    };
-
-    window.addEventListener("afterprint", cleanup, { once: true });
-    window.setTimeout(cleanup, 7000);
-    window.setTimeout(() => window.print(), 60);
+    // Safari and desktop browsers: the printable image is already mounted
+    // in the DOM, so print synchronously from this tap. No timers/rAF.
+    window.print();
   }
 
   return (
@@ -685,39 +666,6 @@ export default function Home() {
         </section>
       </main>
 
-      {printRow && (
-        <section className="iosPrintSheet" aria-label="نسخة الطباعة">
-          <div className="iosPrintHeader">
-            <img src="/anbar-authority-logo.png" alt="" />
-            <strong>هيئة حقوق ذوي الإعاقة والاحتياجات الخاصة / محافظة الأنبار</strong>
-            <span>بيانات استلام بطاقة الضمان الصحي</span>
-          </div>
-
-          <div className="iosPrintName">
-            <span>اسم المستفيد / المعاق :</span>
-            <strong>{printRow["الاسم الكامل"] || "-"}</strong>
-          </div>
-
-          <div className="iosPrintGrid">
-            {fields.map(([key, label]) =>
-              printRow[key] ? (
-                <div className="iosPrintField" key={key}>
-                  <span>{label}</span>
-                  <strong>{printRow[key]}</strong>
-                </div>
-              ) : null
-            )}
-          </div>
-
-          <div className="iosPrintNotes">
-            <strong>تنويه مهم</strong>
-            <span>البطاقة الوطنية الموحدة للمعين والشخص ذي الإعاقة أصلية ومستنسخة.</span>
-            <span>يكون الحضور للمعين المتفرغ أو أحد أقارب الشخص ذي الإعاقة من الدرجة الأولى.</span>
-            <span>يرجى الالتزام بموعد ومكان المراجعة المحددين وعدم مراجعة اللجنة قبل الموعد.</span>
-          </div>
-        </section>
-      )}
-
       {preview && (
         <div className="previewOverlay noPrint" role="dialog" aria-modal="true" aria-label="معاينة بيانات المستفيد">
           <div className="previewModal">
@@ -725,7 +673,7 @@ export default function Home() {
               <div>
                 <strong>{preview.purpose === "print" ? "نسخة جاهزة للطباعة" : "صورة جاهزة للمشاركة"}</strong>
                 <span>
-                  تعمل هذه الطريقة حتى داخل متصفحات فيسبوك وإنستغرام وواتساب وتيليجرام.
+                  على iPhone داخل متصفحات التطبيقات، زر «طباعة الآن» يفتح خيارات iPhone بالصورة الجاهزة.
                 </span>
               </div>
               <button className="closeButton" type="button" onClick={closePreview} aria-label="إغلاق">
@@ -734,7 +682,7 @@ export default function Home() {
             </div>
 
             <div className="previewHint">
-              إذا منع المتصفح الداخلي المشاركة أو الطباعة المباشرة، افتح الصورة بالحجم الكامل أو احفظها ثم أرسلها للمكتبة.
+              داخل Messenger وفيسبوك وإنستغرام وواتساب وتيليجرام: اضغط «طباعة الآن»، ثم اختر «طباعة» من خيارات iPhone. وإذا لم تظهر، افتح الصورة بالحجم الكامل واستخدم زر المشاركة في iPhone.
             </div>
 
             <div className="previewImageWrap">
