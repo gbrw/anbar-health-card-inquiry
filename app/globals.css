@@ -262,3 +262,68 @@ button:disabled { opacity: .6; cursor: default; }
   line-height: 1.7;
   color: #667085;
 }
+
+/* Official identity */
+.officialHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: #fff;
+  color: #0b2f4f;
+  border: 1px solid #d5bd7a;
+  box-shadow: 0 8px 28px rgba(11, 47, 79, .08);
+  padding: 16px 24px;
+}
+
+.officialLogo {
+  width: 128px;
+  height: 128px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.headerText {
+  text-align: right;
+  line-height: 1.8;
+}
+
+.authority {
+  font-size: clamp(18px, 3vw, 27px);
+  font-weight: 800;
+  color: #0b2f4f;
+}
+
+.province {
+  margin-top: 3px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #b51e23;
+}
+
+.printLogo {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 640px) {
+  .officialHeader {
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+  }
+
+  .officialLogo {
+    width: 112px;
+    height: 112px;
+  }
+
+  .headerText { text-align: center; }
+}
+
+@media print {
+  .printHeader strong { font-size: 16px; }
+  .printLogo { display: block; }
+}

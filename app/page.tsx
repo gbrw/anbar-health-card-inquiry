@@ -102,9 +102,15 @@ export default function Home() {
   return (
     <main className="wrap">
       <header className="officialHeader">
-        <div className="ministry">وزارة العمل والشؤون الاجتماعية</div>
-        <div className="authority">هيئة حقوق ذوي الإعاقة والاحتياجات الخاصة</div>
-        <div className="province">قسم الأنبار</div>
+        <img
+          className="officialLogo"
+          src="/anbar-authority-logo.png"
+          alt="شعار هيئة حقوق ذوي الإعاقة والاحتياجات الخاصة - قسم الأنبار"
+        />
+        <div className="headerText">
+          <div className="authority">هيئة حقوق ذوي الإعاقة والاحتياجات الخاصة / محافظة الأنبار</div>
+          <div className="province">خدمة الاستعلام عن بطاقات الضمان الصحي</div>
+        </div>
       </header>
 
       <section className="hero">
@@ -121,7 +127,7 @@ export default function Home() {
             id="beneficiary-name"
             value={q}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
-            placeholder="مثال: محمد أحمد"
+            placeholder="مثال: محمد أحمد أو نورالدين"
             autoComplete="off"
             inputMode="search"
           />
@@ -129,6 +135,9 @@ export default function Home() {
             {loading ? "جاري البحث..." : "بحث"}
           </button>
         </div>
+        <p className="searchHint">
+          البحث مرن: نور الدين = نورالدين، فاطمة = فاطمه، وأشكال الهمزات والياء المختلفة تُعامل تلقائيًا.
+        </p>
 
         {error && (
           <div className="status error" role="alert">
@@ -156,8 +165,12 @@ export default function Home() {
             data-result-index={index}
           >
             <div className="printHeader onlyPrint">
-              <strong>وزارة العمل والشؤون الاجتماعية</strong>
-              <span>هيئة حقوق ذوي الإعاقة والاحتياجات الخاصة – قسم الأنبار</span>
+              <img
+                className="printLogo"
+                src="/anbar-authority-logo.png"
+                alt="شعار هيئة حقوق ذوي الإعاقة والاحتياجات الخاصة - قسم الأنبار"
+              />
+              <strong>هيئة حقوق ذوي الإعاقة والاحتياجات الخاصة / محافظة الأنبار</strong>
               <span>بيانات استلام بطاقة الضمان الصحي</span>
             </div>
 
