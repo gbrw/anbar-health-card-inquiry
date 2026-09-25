@@ -121,7 +121,7 @@ export default function Home() {
             id="beneficiary-name"
             value={q}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
-            placeholder="مثال: محمد أحمد أو نورالدين"
+            placeholder="مثال: محمد أحمد"
             autoComplete="off"
             inputMode="search"
           />
@@ -129,9 +129,6 @@ export default function Home() {
             {loading ? "جاري البحث..." : "بحث"}
           </button>
         </div>
-        <p className="searchHint">
-          البحث مرن: نور الدين = نورالدين، فاطمة = فاطمه، وأشكال الهمزات والياء المختلفة تُعامل تلقائيًا.
-        </p>
 
         {error && (
           <div className="status error" role="alert">
